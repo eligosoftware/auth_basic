@@ -50,7 +50,11 @@ $this->registerJs(
                 <?= Html::submitButton('Login', ['class' => 'btn btn-primary btn-round', 'name' => 'login-button']) ?>
              or <?= Html::a('Sign Up', ['q-test/sign-up'])?>
             </div>
-            
+            <div>
+        <?= yii\authclient\widgets\AuthChoice::widget([
+     'baseAuthUrl' =>['q-test/auth']
+    ]) ?>
+            </div>
         </div>
 
     <?php ActiveForm::end(); ?>
