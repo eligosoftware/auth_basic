@@ -29,5 +29,5 @@ phpunit.phar
 
 tests/_output/*
 tests/_support/_generated
-/common/mail/layouts/
+#/common/mail/layouts/
 /config
