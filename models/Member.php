@@ -22,13 +22,15 @@ class Member extends ActiveRecord implements IdentityInterface{
     
     const  SCENARIO_LOGIN = "login";
     const  SCENARIO_REGISTER = "register";
+    const  SCENARIO_REGISTER_OAUTH = "register_oauth";
 
 
     public function scenarios() {
         return [
             'default' => ['username','password'],
             self::SCENARIO_LOGIN => ['username','password'],
-            self::SCENARIO_REGISTER =>['username','email','password','active']
+            self::SCENARIO_REGISTER =>['username','email','password','active'],
+            self::SCENARIO_REGISTER_OAUTH =>['username','email','active','oauth_type','oauth_id'],
         ];
     }
     
@@ -81,19 +83,27 @@ class Member extends ActiveRecord implements IdentityInterface{
     public static function findIdentity($id) {
         return static::findOne($id);
     }
-    public static function findByUsername($username) {
+    public static function findByUsername($username,$native_only=FALSE) {
         
         if(filter_var($username, FILTER_VALIDATE_EMAIL))
             {
-                return static::findOne(['email'=>$username]);
+            $array=['email'=>$username];
             }
             else{
-               return static::findOne(['username'=>$username]);
+               $array=['username'=>$username];
             }
+            if ($native_only) {
+                $array+=['oauth_type'=>'native'];
+            }
+            return static::findOne($array);
     }
 
-        public static function findByEmail($email) {
-       return static::findOne(['email'=>$email]);
+        public static function findByEmail($email,$native_only=FALSE) {
+            $array=['email'=>$email];
+            if ($native_only) {
+                $array+=['oauth_type'=>'native'];
+            }
+       return static::findOne($array);
     }
     public static function findIdentityByAccessToken($token, $type = null) {
         return static::findOne(['access_token'=>$token]);
@@ -138,6 +148,41 @@ class Member extends ActiveRecord implements IdentityInterface{
             'username'=>'Username',
             'password'=>'Password'
         ];
+    }
+    public static function registerOAuthUser($attributes,$oauth_type){
+        
+        $attributes+=['oauth_type'=>$oauth_type];        
+        
+        $member=Member::findOne(['email'=>$attributes['email'],'oauth_type'=>$oauth_type]);
+        
+        if(!$member){
+            $member=new Member();
+            $member->scenario=  Member::SCENARIO_REGISTER_OAUTH;
+            $member->load($member->turnToData($attributes));
+            $member->save();
+        }
+        
+        return $member;
+    }
+    
+    public function getName(){
+        
+        $arr=  explode(" ", $this->username);
+        return $arr[0];
+        
+    }
+
+        public function turnToData($attributes){
+        
+        $data['email']=  $attributes['email'];
+        $data['username']=  $attributes['name'];
+        $data['active']=1;
+        $data['oauth_type']=$attributes['oauth_type'];
+        $data['oauth_id']=$attributes['id'];
+
+        
+        
+        return ['Member'=>$data];
     }
 //put your code here
 }

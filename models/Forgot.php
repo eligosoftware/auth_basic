@@ -30,7 +30,7 @@ class Forgot extends Model{
     public function send_email(){
     
         
-            $member=  \app\models\Member::findByUsername($this->email);
+            $member=  \app\models\Member::findByUsername($this->email,true);
             if($member!=NULL){
                 $member->generatePasswordResetToken();
                // $member->scenario=  \app\models\Member::SCENARIO_LOGIN;

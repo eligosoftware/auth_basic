@@ -89,10 +89,10 @@ class LoginForm extends Model
         if ($this->_user === false) {
             if(filter_var($this->username, FILTER_VALIDATE_EMAIL))
             {
-                $this->_user = Member::findByEmail($this->username);
+                $this->_user = Member::findByEmail($this->username,true);
             }
             else{
-               $this->_user = Member::findByUsername($this->username);
+               $this->_user = Member::findByUsername($this->username,true);
             }
             
          

@@ -192,6 +192,7 @@ class QTestController extends Controller
     
     public function successCallback($client)
 {
+       
     $attributes = $client->getUserAttributes();
         // user login or signup comes here
         /*
@@ -201,14 +202,33 @@ class QTestController extends Controller
         */
         
         //$user = \common\modules\auth\models\User::find()->where([’email’=>$attributes[’email’]])->one();
-        $user=  \app\models\Member::find()->where([['email']=>$attributes['email']])->one();
+//        $user=  \app\models\Member::find()->where([['email']=>$attributes['email']])->one();
+        
+    
+    $oauth_type=(new \ReflectionClass($client))->getShortName();
+    
+    if($oauth_type=='Google'){
+        $email=$attributes['emails'][0]['value'];
+        $gattributes['name']=$attributes['displayName'];
+        $gattributes['email']=$email;
+        $gattributes['id']=$attributes['id'];
+        $attributes=$gattributes;
+        
+    }
+    elseif ($oauth_type=='Facebook'){
+        $email=$attributes['email'];
+    }
+    $user= \app\models\Member::findOne(['email'=>$attributes['email'],'oauth_type'=>$oauth_type]);
         if(!empty($user)){
             Yii::$app->user->login($user);
         
         }else{
-            // Save session attribute user from FB
-            $session = Yii::$app->session;
-            $session['attributes']=$attributes;
+            
+            $user=\app\models\Member::registerOAuthUser($attributes,$oauth_type);
+            Yii::$app->user->login($user);
+// Save session attribute user from FB
+//            $session = Yii::$app->session;
+//            $session['attributes']=$attributes;
             // redirect to form signup, variabel global set to successUrl
             $this->successUrl = \yii\helpers\Url::to(['q-test/index']);
         }

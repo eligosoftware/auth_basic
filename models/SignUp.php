@@ -49,7 +49,8 @@ class SignUp extends Model{
     }
     public function checkforUnique_email($attribute, $params){
         if(!$this->hasErrors()){
-            $user= Member::findByEmail($this->email);
+            
+            $user=  Member::findOne(['email'=>$this->email,'oauth_type'=>'native']);
             
             if($user){
                 $this->addError($attribute, 'Email is taken');
